@@ -3,11 +3,8 @@ import { galleryItems } from './gallery-items.js';
 
 const gallery = document.querySelector('.gallery');
 const galleryMarkup = createGalleryMarkup(galleryItems);
-let instance;
 
 gallery.insertAdjacentHTML('beforeend', galleryMarkup);
-gallery.addEventListener('click', onGalleryClick);
-gallery.addEventListener('keydown', onEscapeClose);
 
 function createGalleryMarkup(galleryItems) {
   return galleryItems
@@ -26,21 +23,30 @@ function createGalleryMarkup(galleryItems) {
     .join('');
 }
 
+const instance = basicLightbox.create(`<img class="modal-img" src ="">`, {
+  onShow: instance => {
+    document.addEventListener('keydown', onEscapeClose);
+  },
+
+  onClose: instance => {
+    document.removeEventListener('keydown', onEscapeClose);
+  },
+});
+
 function onGalleryClick(event) {
   event.preventDefault();
   if (event.target.nodeName !== 'IMG') {
     return;
   }
 
-  const largeImage = event.target.dataset.source;
-  instance = basicLightbox.create(`
-	<img src="${largeImage}" width="800" height="600">
-`);
+  instance.element().querySelector('img').src = event.target.dataset.source;
   instance.show();
 }
+gallery.addEventListener('click', onGalleryClick);
 
 function onEscapeClose(event) {
   if (event.code === 'Escape' && instance.visible()) {
     instance.close();
+    return;
   }
 }
